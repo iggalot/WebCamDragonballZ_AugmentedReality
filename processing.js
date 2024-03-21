@@ -64,14 +64,29 @@ function process(ctx, threshold=40){
 
     // and put this back
 
-    ctx.beginPath();
-
-    ctx.arc(ballCenter.x, ballCenter.y, ballRadius * 0.5, 0, 2 * Math.PI);
-    ctx.fillStyle = "red";
-    ctx.fill();
+    drawStar(ctx, ballCenter, ballRadius * 0.5);
 
     ctx.drawImage(tmpCanvas, 0, 0);
 
+}
+
+function drawStar(ctx, center, radius) {
+    ctx.beginPath();
+    const minRadius = radius * 0.4;
+    for (let i = 0; i < 10; i++){
+        const angle = (i * 2 * Math.PI) / 10 - Math.PI / 2;
+        const rad=(i % 2 === 0) ? radius : minRadius;
+        const x = center.x + rad * Math.cos(angle);
+        const y = center.y + rad * Math.sin(angle);
+        if (i===0) {
+            ctx.moveTo(x,y);
+        } else {
+            ctx.lineTo(x,y);
+        }
+    }
+    ctx.closePath();
+    ctx.fillStyle = "red";
+    ctx.fill();
 }
 
 function rgbToHsl(r, g, b) {
