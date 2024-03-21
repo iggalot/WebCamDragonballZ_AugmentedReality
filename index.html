@@ -1,0 +1,56 @@
+<!DOCTYPE html></DOCTYPE>
+<html>
+    <head>
+        <title>Augmented Reality Dragon Ball</title>
+        <style>
+            body{
+                text-align: center;
+            }
+            canvas{
+                border: 1px solid black;
+                margin: 0 auto;
+                display: block;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Augmented Reality Dragon Ball</h1>
+        <canvas id="myCanvas"></canvas>
+        <script src="processing.js"></script>
+        <script>
+            document.getElementById('myCanvas');
+            var canvas = document.getElementById('myCanvas');
+            const ctx = canvas.getContext('2d');
+            const video = document.createElement('video');
+            const dragonballImage = new Image();
+            dragonballImage.src = 'dragonball_img.png';
+
+            // const vendorUrl = window.URL || window.webkitURL;
+            navigator.getMedia = navigator.getUserMedia 
+            || navigator.webkitGetUserMedia 
+            || navigator.mozGetUserData 
+            || navigator.msGetUserMedia;
+            navigator.getMedia({ video: true, audio: false}, (stream)=> {
+                video.srcObject = stream;
+                video.play();
+                video.onloadeddata= ()=> {
+                    canvas.width=video.videoWidth;
+                    canvas.height=video.videoHeight;
+                }
+            }, (error) => {
+                // An error occured
+                // error.code
+                alert("Error in the video");
+            });
+            video.addEventListener('play', function() {
+                draw(this, ctx);
+            }, false);
+
+            function draw(video, context){
+                context.drawImage(video, 0, 0);
+                process(context);
+                setTimeout(draw, 10, video, context);
+            }
+        </script>
+    </body>
+</html>
