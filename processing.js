@@ -4,6 +4,7 @@ function process(ctx, threshold=40){
     const imgData = ctx.getImageData(0,0,ctx.canvas.width, ctx.canvas.height);
     const data = imgData.data;
     const ballCenter = {x:0, y:0};
+    const bluePixels = [];
     let count=0;
     const ballMin = {x: ctx.canvas.width, y: ctx.canvas.height };
     const ballMax = {x: 0, y: 0 };
@@ -25,7 +26,7 @@ function process(ctx, threshold=40){
 
             const x = (i / 4) % ctx.canvas.width;
             const y = Math.floor(i / 4 / ctx.canvas.width);
-
+            bluePixels.push({x,y});
             ballCenter.x += x;
             ballCenter.y += y;
             count++;
@@ -56,25 +57,71 @@ function process(ctx, threshold=40){
 
     // ctx.drawImage(dragonballImage, ballLeft, ballTop, ballRadius * 2, ballRadius * 2);
 
-    drawStars(ctx, ballCenter, ballRadius * starScalingFactor, starCount);
+    const {center, radius} = getBetterCircleProperties(ctx, ballCenter, ballRadius, bluePixels);
+
+    drawStars(ctx, center, radius * starScalingFactor, starCount);
 
     ctx.drawImage(tmpCanvas, 0, 0);
 
     // the halo
     ctx.beginPath();
-    const deltaRadius = ballRadius * 0.4;
+    const deltaRadius = radius * 0.4;
     const grd=ctx.createRadialGradient(
-        ballCenter.x, ballCenter.y, ballRadius-deltaRadius / 2,
-        ballCenter.x, ballCenter.y, ballRadius+deltaRadius / 2
+        center.x, center.y, radius-deltaRadius / 2,
+        center.x, center.y, radius+deltaRadius / 2
     );
     grd.addColorStop(0,"rgba(255, 255, 0, 0)");
     grd.addColorStop(0.5,"rgba(255, 255, 0, 0.5)");
     grd.addColorStop(1,"rgba(255, 255, 0, 0)");
 
     ctx.fillStyle = grd;
-    ctx.arc(ballCenter.x, ballCenter.y, ballRadius + deltaRadius / 2, 0, 2 * Math.PI);
+    ctx.arc(center.x, center.y, radius + deltaRadius / 2, 0, 2 * Math.PI);
     ctx.fill();
 
+}
+
+function getBetterCircleProperties(ctx, center, radius, bluePixels){
+    let newCenter = center;
+    let newRadius = radius;
+
+    /*
+    //TODO:  Figure out a better way to move the center of the circle
+    //using morphological dilation for the bluePixels.
+
+    const err=computeError(center, radius, bluePixels);
+    let prevErr=1;
+    while(prevErr > err){
+        newRadius += 1;
+        prevErr=err;
+        err = computeError(newCenter,newRadius, bluePixels);
+    }
+
+    for(let i = 1; i <=100; i++){
+        const deltaX = Math.random()*newRadus*2-newRadius;
+        const deltaY = Math.random()*newRadus*2-newRadius;
+
+        const candCenter =  {x:newCenter.x + deltaX, y: newCenter.y + deltaY};
+        computeError(candError)
+    }
+
+    console.log(err);
+    */
+
+    return { center: newCenter, radius: newRadius };
+}
+
+function computeError(center, radius, bluePixels){
+    let error = 0;
+    for (let i=0; i < bluePixels.length; i++){
+        const {x,y} = bluePixels[i];
+        const dx = x - center.x;
+        const dy = y - center.y;
+        const distance = dx * dx + dy * dy;
+        if(distance > radius ** 2){
+            error += 1;
+        }
+    }
+    return error / bluePixels.length;
 }
 
 function drawStars(ctx, center, radius, count){
