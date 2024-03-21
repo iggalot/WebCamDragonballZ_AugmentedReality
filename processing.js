@@ -60,6 +60,21 @@ function process(ctx, threshold=40){
 
     ctx.drawImage(tmpCanvas, 0, 0);
 
+    // the halo
+    ctx.beginPath();
+    const deltaRadius = ballRadius * 0.4;
+    const grd=ctx.createRadialGradient(
+        ballCenter.x, ballCenter.y, ballRadius-deltaRadius / 2,
+        ballCenter.x, ballCenter.y, ballRadius+deltaRadius / 2
+    );
+    grd.addColorStop(0,"rgba(255, 255, 0, 0)");
+    grd.addColorStop(0.5,"rgba(255, 255, 0, 0.5)");
+    grd.addColorStop(1,"rgba(255, 255, 0, 0)");
+
+    ctx.fillStyle = grd;
+    ctx.arc(ballCenter.x, ballCenter.y, ballRadius + deltaRadius / 2, 0, 2 * Math.PI);
+    ctx.fill();
+
 }
 
 function drawStars(ctx, center, radius, count){
