@@ -63,6 +63,29 @@ function process(ctx, threshold=40){
 }
 
 function drawStars(ctx, center, radius, count){
+    switch(count) {
+        case 1: 
+            drawStar(ctx, center, radius * 0.4);
+            break;
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+            drawStarsInCircle(ctx, center, radius, count);
+            break;
+        case 6:
+            drawStarsInCircle(ctx, center, radius, count-1);
+            drawStar(ctx, center, radius * 0.4);
+            break;
+        case 7:
+            drawStarsInCircle(ctx, center, radius, count-1);
+            drawStar(ctx, center, radius * 0.4);
+            break;
+
+    }
+}
+
+function drawStarsInCircle(ctx, center, radius, count){
     for (let i=0; i < count; i++) {
         const angle = (i * 2 * Math.PI) / count;
         const x = center.x + radius * Math.cos(angle);
