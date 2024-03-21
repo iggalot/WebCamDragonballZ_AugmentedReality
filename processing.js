@@ -21,7 +21,7 @@ function process(ctx, threshold=40){
             data[i] = r2;
             data[i+1] = g2;
             data[i+2] = b2;
-            data[i+3] = 140;  // alpha value to put object behind the orange (inside)
+            data[i+3] = 90;  // alpha value to put object behind the orange (inside)
 
             const x = (i / 4) % ctx.canvas.width;
             const y = Math.floor(i / 4 / ctx.canvas.width);
@@ -56,7 +56,7 @@ function process(ctx, threshold=40){
 
     // ctx.drawImage(dragonballImage, ballLeft, ballTop, ballRadius * 2, ballRadius * 2);
 
-    drawStars(ctx, ballCenter, ballRadius * 0.4, starCount);
+    drawStars(ctx, ballCenter, ballRadius * starScalingFactor, starCount);
 
     ctx.drawImage(tmpCanvas, 0, 0);
 
@@ -65,7 +65,7 @@ function process(ctx, threshold=40){
 function drawStars(ctx, center, radius, count){
     switch(count) {
         case 1: 
-            drawStar(ctx, center, radius * 0.4);
+            drawStar(ctx, center, radius * starScalingFactor);
             break;
         case 2:
         case 3:
@@ -75,11 +75,11 @@ function drawStars(ctx, center, radius, count){
             break;
         case 6:
             drawStarsInCircle(ctx, center, radius, count-1);
-            drawStar(ctx, center, radius * 0.4);
+            drawStar(ctx, center, radius * starScalingFactor);
             break;
         case 7:
             drawStarsInCircle(ctx, center, radius, count-1);
-            drawStar(ctx, center, radius * 0.4);
+            drawStar(ctx, center, radius * starScalingFactor);
             break;
 
     }
@@ -90,7 +90,7 @@ function drawStarsInCircle(ctx, center, radius, count){
         const angle = (i * 2 * Math.PI) / count;
         const x = center.x + radius * Math.cos(angle);
         const y = center.y + radius * Math.sin(angle);
-        drawStar(ctx, {x,y}, radius * 0.4);
+        drawStar(ctx, {x,y}, radius * starScalingFactor);
     }
 }
 

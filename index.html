@@ -16,6 +16,18 @@
     <body>
         <h1>Augmented Reality Dragon Ball</h1>
         <canvas id="myCanvas"></canvas>
+        <br>
+        <select onchange="changeStarCount()">
+            <option value="1">1 Star</option>
+            <option value="2">2 Stars</option>
+            <option value="3">3 Stars</option>
+            <option value="4">4 Stars</option>
+            <option value="5">5 Stars</option>
+            <option value="6">6 Stars</option>
+            <option value="7">7 Stars</option>
+        </select>
+        <input id="thresholdSlider" type="range" min="0" max="255" step="1" value="40">
+
         <script src="processing.js"></script>
         <script>
             document.getElementById('myCanvas');
@@ -23,7 +35,8 @@
             const ctx = canvas.getContext('2d');
             const video = document.createElement('video');
             const dragonballImage = new Image();
-            const starCount = 7;
+            let starCount = 1;
+            const starScalingFactor = 0.45;
 
             dragonballImage.src = 'dragonball_img.png';
 
@@ -50,9 +63,14 @@
 
             function draw(video, context){
                 context.drawImage(video, 0, 0);
-                process(context);
+                process(context, thresholdSlider.value);
                 setTimeout(draw, 10, video, context);
             }
+
+            function changeStarCount(){
+                starCount = parseInt(document.querySelector('select').value);
+            }
+
         </script>
     </body>
 </html>
