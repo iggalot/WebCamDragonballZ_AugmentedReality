@@ -1,12 +1,12 @@
-function process(ctx, threshold=60){
+function process(ctx, threshold=40){
     // ctx.fillStyle = "red";
     // ctx.fillRect(0,0,100,100);
     const imgData = ctx.getImageData(0,0,ctx.canvas.width, ctx.canvas.height);
     const data = imgData.data;
+    const ballCenter = {x:0, y:0};
+    let count=0;
     const ballMin = {x: ctx.canvas.width, y: ctx.canvas.height };
     const ballMax = {x: 0, y: 0 };
-    // let count=0;   
-    let ok=false; 
     for (let i = 0; i< data.length; i += 4) {
         const r = data[i];
         const g = data[i+1];
@@ -14,47 +14,33 @@ function process(ctx, threshold=60){
         const blueness = Math.min(b-r, b-g);
 
         if(blueness > threshold){
-            ok=true;
-        // Creates a negative of the image
-        // data[i] = 255 - data[i];
-        // data[i+1] = 255 - data[i+1];
-        // data[i+2] = 255 - data[i+2];
-
-        // Shifted technique
-        // const [h, s, l] = rgbToHsl(r, g, b);
-        // const shiftedHue = h + 0.5;
-        // const [r2, g2, b2] = hslToRgb(shiftedHue, s, l);
-        // data[i] = r2;
-        // data[i+1] = g2;
-        // data[i+2] = b2;
+            //Shifted technique
+            const [h, s, l] = rgbToHsl(r, g, b);
+            const shiftedHue = h + 0.5;
+            const [r2, g2, b2] = hslToRgb(shiftedHue, s, l);
+            data[i] = r2;
+            data[i+1] = g2;
+            data[i+2] = b2;
             data[i+3] = 0;
+
             const x = (i / 4) % ctx.canvas.width;
             const y = Math.floor(i / 4 / ctx.canvas.width);
-            if (x < ballMin.x) ballMin.x = x;
-            if (x > ballMax.x) ballMax.x = x;
-            if (y < ballMin.y) ballMin.y = y;
-            if (y > ballMax.y) ballMax.y = y;
 
-            // ballCenter.x += x;
-            // ballCenter.y += y;
-            // count++;
+            ballCenter.x += x;
+            ballCenter.y += y;
+            count++;
         }
     }
 
     // if no blue pixels exit
-    if(ok==false)
+    if(count==0) 
         return;
 
-    // ballCenter.x /= count;
-    // ballCenter.y /= count;
-    const ballCenter = {
-        x: (ballMin.x + ballMax.x) / 2,
-        y: (ballMin.y + ballMax.y) / 2
-    };
-    const ballRadius = Math.max(
-        (ballMax.x - ballMin.x) / 2,
-        (ballMax.y - ballMin.y) / 2
-    );
+    ballCenter.x /= count;
+    ballCenter.y /= count;
+
+    // if no blue pixels exit
+    const ballRadius = Math.sqrt(count / Math.PI);
 
     // create a temporary canvas to store the marker
     const tmpCanvas = document.createElement("canvas");
@@ -63,21 +49,29 @@ function process(ctx, threshold=60){
     tmpCanvas.height = ctx.canvas.height;
     tmpCtx.putImageData(imgData, 0, 0);
 
-    //ctx.putImageData(imgData, 0, 0);
+    for (let i = 0; i< data.length; i += 4) {
+        data[i+3] = 255;  // make it non-transparent again
+    }
+    ctx.putImageData(imgData, 0, 0);  // put it back on the main image
 
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    const ballLeft = ballCenter.x - ballRadius;
-    const ballTop = ballCenter.y - ballRadius;
+    // ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    // const ballLeft = ballCenter.x - ballRadius;
+    // const ballTop = ballCenter.y - ballRadius;
 
-    ctx.drawImage(dragonballImage, ballLeft, ballTop, ballRadius * 2, ballRadius * 2);
+    // ctx.drawImage(dragonballImage, ballLeft, ballTop, ballRadius * 2, ballRadius * 2);
 
-    // ctx.beginPath();
-    // ctx.arc(ballCenter.x, ballCenter.y, ballRadius * 0.5, 0, 2 * Math.PI);
-    // ctx.fillStyle = "red";
-    // ctx.fill();
+
 
     // and put this back
+
+    ctx.beginPath();
+
+    ctx.arc(ballCenter.x, ballCenter.y, ballRadius * 0.5, 0, 2 * Math.PI);
+    ctx.fillStyle = "red";
+    ctx.fill();
+
     ctx.drawImage(tmpCanvas, 0, 0);
+
 }
 
 function rgbToHsl(r, g, b) {
